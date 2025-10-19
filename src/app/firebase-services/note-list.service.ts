@@ -33,17 +33,8 @@ export class NoteListService {
       console.log(el);
     }); */
 
-    this.unsubNotes = onSnapshot(this.getNotesRef(), list => {
-      list.forEach(e => {
-        this.setNoteObject(e.data(), e.id);
-      })
-    })
-
-    this.unsubTrash = onSnapshot(this.getTrashRef(), list => {
-      list.forEach(e => {
-        this.setNoteObject(e.data(), e.id);
-      })
-    })
+    this.unsubNotes = this.subNotesList();
+    this.unsubTrash = this.subTrashList();
 
     /* this.items$ = collectionData(this.getNotesRef());  //rausgenommmen, in diesem Projekt Fokus auf onSnapshot
     this.items = this.items$.subscribe((list) => {
@@ -67,6 +58,24 @@ export class NoteListService {
 
   getTrashRef() {
     return collection(this.firestore, 'trash');
+  }
+
+  subNotesList() {
+    return onSnapshot(this.getNotesRef(), (list) => {
+      this.normalNotes = [];
+      list.forEach(e => {
+        this.normalNotes.push(this.setNoteObject(e.data(), e.id));
+      });
+    });
+  }
+
+  subTrashList() {
+    return onSnapshot(this.getTrashRef(), (list) => {
+      this.trashNotes = [];
+      list.forEach(e => {
+        this.trashNotes.push(this.setNoteObject(e.data(), e.id));
+      });
+    });
   }
 
   /* getSingleDocRef(colId:string, docId:string) {      //ausgeklammert da beispiel
