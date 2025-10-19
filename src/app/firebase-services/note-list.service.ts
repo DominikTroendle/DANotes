@@ -11,24 +11,54 @@ export class NoteListService {
   trashNotes: Note[] = [];
   normalNotes: Note[] = [];
 
-  unsubList;
-  unsubSingle;
+  /* unsubList;     //ausgeklammert da beispiel
+  unsubSingle; */
+  unsubNotes;
+  unsubTrash;
 
-  items;
+  /* items$;  //rausgenommen, gehört zu collectionData und subscribe
+  items; */
   firestore: Firestore = inject(Firestore);
   
   constructor() {
-    this.unsubList = onSnapshot(this.getNotesRef(), (list) => {
+    /* this.unsubList = onSnapshot(this.getNotesRef(), (list) => {        //ausgeklammert da beispiel
       list.forEach(element => {
         console.log(element);
+        console.log(element.data());
+        console.log(this.setNoteObject(element.data(), element.id));
+        this.setNoteObject(element.data(), element.id);
       });
     });
     this.unsubSingle = onSnapshot(this.getSingleDocRef('notes', 'AkpL97d0oIDK19q6tu6H'), (el) => {
       console.log(el);
-    });
-    this.unsubList();
-    this.unsubSingle();
-    this.items = collectionData(this.getNotesRef());
+    }); */
+
+    this.unsubNotes = onSnapshot(this.getNotesRef(), list => {
+      list.forEach(e => {
+        this.setNoteObject(e.data(), e.id);
+      })
+    })
+
+    this.unsubTrash = onSnapshot(this.getTrashRef(), list => {
+      list.forEach(e => {
+        this.setNoteObject(e.data(), e.id);
+      })
+    })
+
+    /* this.items$ = collectionData(this.getNotesRef());  //rausgenommmen, in diesem Projekt Fokus auf onSnapshot
+    this.items = this.items$.subscribe((list) => {
+      list.forEach(e => {
+        console.log(e);
+      });
+    }); */
+  }
+
+  ngOnDestroy() {
+    // this.unsubList();         //ausgeklammert da beispiel
+    // this.unsubSingle();       //ausgeklammert da beispiel
+    this.unsubNotes();
+    this.unsubTrash();
+    // this.items.unsubscribe(); //rausgenommen, gehört zu collectionData und subscribe 
   }
 
   getNotesRef() {
@@ -39,7 +69,17 @@ export class NoteListService {
     return collection(this.firestore, 'trash');
   }
 
-  getSingleDocRef(colId:string, docId:string) {
+  /* getSingleDocRef(colId:string, docId:string) {      //ausgeklammert da beispiel
     return doc(collection(this.firestore, colId), docId);
+  } */
+
+  setNoteObject(obj: any, id: string): Note {
+    return {
+      id: id || "",
+      type: obj.type || "note",
+      title: obj.title || "",
+      content: obj.content || "",
+      marked: obj.marked || false
+    }
   }
 }
