@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Note } from '../interfaces/note.interface';
-import { Firestore, collection, collectionData, doc, onSnapshot, addDoc } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, doc, onSnapshot, addDoc, updateDoc } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -8,8 +8,8 @@ import { Observable } from 'rxjs';
 })
 export class NoteListService {
 
-  trashNotes: Note[] = [];
-  normalNotes: Note[] = [];
+  trashNotes:Note[] = [];
+  normalNotes:Note[] = [];
 
   /* unsubList;     //ausgeklammert da beispiel
   unsubSingle; */
@@ -78,11 +78,11 @@ export class NoteListService {
     });
   }
 
-  /* getSingleDocRef(colId:string, docId:string) {      //ausgeklammert da beispiel
+  getSingleDocRef(colId:string, docId:string) {
     return doc(collection(this.firestore, colId), docId);
-  } */
+  }
 
-  setNoteObject(obj: any, id: string): Note {
+  setNoteObject(obj:any, id:string):Note {
     return {
       id: id || "",
       type: obj.type || "note",
@@ -95,8 +95,34 @@ export class NoteListService {
   async addNote(item: {}) {
     await addDoc(this.getNotesRef(), item).catch(
       (err) => { console.error(err) }
-    ) .then(
+    ).then(
       (docRef) => { console.log('Document written with ID: ', docRef?.id); }
     );
+  }
+
+  async updateNote(note:Note) {
+    if(note.id) {
+      let docRef = this.getSingleDocRef(this.getColIdFromNote(note), note.id);
+      await updateDoc(docRef, this.getCleanJson(note)).catch(
+        (err) => { console.error(err) }
+      );
+    }
+  }
+
+  getCleanJson(note:Note):{} {
+    return {
+      type: note.type,
+      title: note.title,
+      content: note.content,
+      marked: note.marked
+    }
+  }
+
+  getColIdFromNote(note:Note) {
+    if(note.type == "note") {
+      return "notes";
+    } else {
+      return "trash";
+    }
   }
 }
