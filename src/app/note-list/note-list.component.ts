@@ -23,8 +23,12 @@ export class NoteListComponent {
     
   }
 
-  getList(): Note[] {
-    return this.noteService.normalNotes;
+  getList(coll: string): Note[] {
+    if (coll) {
+      return this.noteService.normalNotes;
+    } else {
+      return this.noteService.trashNotes;
+    }
   }
 
   changeFavFilter(filter:"all" | "fav"){
