@@ -133,14 +133,8 @@
         </div>
     </div>
     <div>
-        @if (status == "trash") {
-            @for (note of getList('trash'); track note) {
-                <app-note [note]="note"></app-note>
-            }
-        } @else {
-            @for (note of getList('notes'); track note) {
-                <app-note [note]="note"></app-note>
-            }
+        @for (note of getList(status == 'trash' ? 'trash' : 'notes'); track note) {
+            <app-note [note]="note"></app-note>
         }
     </div>
 </div>

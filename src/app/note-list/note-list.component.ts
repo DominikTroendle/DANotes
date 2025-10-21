@@ -23,8 +23,8 @@ export class NoteListComponent {
     
   }
 
-  getList(coll: string): Note[] {
-    if (coll) {
+  getList(coll: "notes" | "trash"): Note[] {
+    if (coll === "notes") {
       return this.noteService.normalNotes;
     } else {
       return this.noteService.trashNotes;
