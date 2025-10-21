@@ -65,9 +65,39 @@ export class NoteListService {
   }
 
   subNotesList() {      //with filter (limit)
-    const q = query(this.getNotesRef(), limit(3));
-    // const q = query(this.getNotesRef(), orderBy("title"), limit(3));
+    const q = query(this.getNotesRef(), orderBy("title"), limit(3));
     return onSnapshot(q, (list) => {
+      this.normalNotes = [];
+      list.forEach(e => {
+        this.normalNotes.push(this.setNoteObject(e.data(), e.id));
+      });
+      list.docChanges().forEach((change) => {
+        if (change.type === "added") {
+            console.log("New note: ", change.doc.data());
+        }
+        if (change.type === "modified") {
+            console.log("Modified note: ", change.doc.data());
+        }
+        if (change.type === "removed") {
+            console.log("Removed note: ", change.doc.data());
+        }
+      });
+    });
+  }
+
+  /* subNotesList() {     //without filter
+    const q = query(this.getNotesRef(), where("state", "==", "CA"));
+    return onSnapshot(this.getNotesRef(), (list) => {
+      this.normalNotes = [];
+      list.forEach(e => {
+        this.normalNotes.push(this.setNoteObject(e.data(), e.id));
+      });
+    });
+  } */
+
+  subNotesListWithSubColl() {
+    let subCollRef = collection(this.firestore, "notes/S395th77kjOCpqqIYemw/notesExtra");
+    return onSnapshot(subCollRef, (list) => {
       this.normalNotes = [];
       list.forEach(e => {
         this.normalNotes.push(this.setNoteObject(e.data(), e.id));
@@ -84,16 +114,6 @@ export class NoteListService {
       });
     });
   }
-
-  /* subNotesList() {     //without filter
-    const q = query(this.getNotesRef(), where("state", "==", "CA"));
-    return onSnapshot(this.getNotesRef(), (list) => {
-      this.normalNotes = [];
-      list.forEach(e => {
-        this.normalNotes.push(this.setNoteObject(e.data(), e.id));
-      });
-    });
-  } */
 
   subTrashList() {
     return onSnapshot(this.getTrashRef(), (list) => {
