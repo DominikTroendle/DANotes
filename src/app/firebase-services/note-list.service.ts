@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Note } from '../interfaces/note.interface';
-import { Firestore, collection, collectionData, doc, onSnapshot, addDoc, updateDoc, deleteDoc } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, doc, onSnapshot, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -10,10 +10,12 @@ export class NoteListService {
 
   trashNotes:Note[] = [];
   normalNotes:Note[] = [];
+  normalMarkedNotes:Note[] = [];
 
   /* unsubList;     //ausgeklammert da beispiel
   unsubSingle; */
   unsubNotes;
+  unsubMarkedNotes;
   unsubTrash;
 
   /* items$;  //rausgenommen, gehört zu collectionData und subscribe
@@ -34,6 +36,7 @@ export class NoteListService {
     }); */
 
     this.unsubNotes = this.subNotesList();
+    this.unsubMarkedNotes = this.subMarkedNotesList();
     this.unsubTrash = this.subTrashList();
 
     /* this.items$ = collectionData(this.getNotesRef());  //rausgenommmen, in diesem Projekt Fokus auf onSnapshot
@@ -48,6 +51,7 @@ export class NoteListService {
     // this.unsubList();         //ausgeklammert da beispiel
     // this.unsubSingle();       //ausgeklammert da beispiel
     this.unsubNotes();
+    this.unsubMarkedNotes();
     this.unsubTrash();
     // this.items.unsubscribe(); //rausgenommen, gehört zu collectionData und subscribe 
   }
@@ -60,14 +64,36 @@ export class NoteListService {
     return collection(this.firestore, 'trash');
   }
 
-  subNotesList() {
-    return onSnapshot(this.getNotesRef(), (list) => {
+  subNotesList() {      //with filter (limit)
+    const q = query(this.getNotesRef(), limit(3));
+    // const q = query(this.getNotesRef(), orderBy("title"), limit(3));
+    return onSnapshot(q, (list) => {
       this.normalNotes = [];
       list.forEach(e => {
         this.normalNotes.push(this.setNoteObject(e.data(), e.id));
       });
     });
   }
+
+  subMarkedNotesList() {      //with filter (where)
+    const q = query(this.getNotesRef(), where("marked", "==", false), limit(3));
+    return onSnapshot(q, (list) => {
+      this.normalMarkedNotes = [];
+      list.forEach(e => {
+        this.normalMarkedNotes.push(this.setNoteObject(e.data(), e.id));
+      });
+    });
+  }
+
+  /* subNotesList() {     //without filter
+    const q = query(this.getNotesRef(), where("state", "==", "CA"));
+    return onSnapshot(this.getNotesRef(), (list) => {
+      this.normalNotes = [];
+      list.forEach(e => {
+        this.normalNotes.push(this.setNoteObject(e.data(), e.id));
+      });
+    });
+  } */
 
   subTrashList() {
     return onSnapshot(this.getTrashRef(), (list) => {

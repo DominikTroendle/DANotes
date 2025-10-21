@@ -23,9 +23,13 @@ export class NoteListComponent {
     
   }
 
-  getList(coll: "notes" | "trash"): Note[] {
-    if (coll === "notes") {
-      return this.noteService.normalNotes;
+  getList(): Note[] {
+    if(this.status === "notes") {
+      if(this.favFilter == "all") {
+        return this.noteService.normalNotes;
+      } else {
+        return this.noteService.normalMarkedNotes;
+      }
     } else {
       return this.noteService.trashNotes;
     }
